@@ -527,7 +527,7 @@ tie:
     pitch::UN{Pitch} = nothing, "~"
     rest::UN{Rest} = nothing, "~"
     unpitched::UN{Unpitched} = nothing, "~"
-    duration::UInt = 1, "~"
+    duration::Int = 1, "~"
     chord::UN{Chord} = nothing, "~"
     # voice
     type::UN{String} = nothing, "~"
@@ -553,7 +553,55 @@ notes: See [`Note`](@ref) doc
 @aml mutable struct Measure "measure"
     attributes::UN{Attributes} = nothing, "~"
     notes::Vector{Note}, "note"
+    @creator begin
+        notes = note_graphics(notes, attributes)
+    end
 end
+
+"""
+Finds the graphical representation of a note based on attributes.divisions and note.duration
+
+# Examples
+```julia
+notes = [
+Note(pitch = Pitch(step = "G", alter = 0, octave = 5), duration =  1),
+Note(pitch = Pitch(step = "G", alter = +1, octave = 5), duration =  1),
+Note(pitch = Pitch(step = "B", alter = 0, octave = 5), duration =  1),
+Note(pitch = Pitch(step = "A", alter = +1, octave = 5), duration =  1),
+Note(rest = Rest(), duration =  4), # Rest
+Note(pitch = Pitch(step = "A", alter = 0, octave = 5), duration =  4),
+Note(pitch = Pitch(step = "B", alter = 0, octave = 5), duration =  4),
+]
+MusicXML.note_graphics(notes, Attributes())
+```
+"""
+function note_graphics(notes, attributes)
+    for inote=1:length(notes)
+        actual_duration = notes[inote].duration//attributes.divisions
+        type = note_graphics_map[actual_duration]
+        notes[inote].type = type
+    end
+    return notes
+end
+
+const note_graphics_map = Dict(
+    1//256 => "1024th",
+    1//128 => "512th",
+    1//64 => "256th",
+    1//32 => "128th",
+    1//16 => "64th",
+    1//8 => "32nd",
+    1//4 => "16th",
+    1//2 => "eighth",
+    1 => "quarter",
+    2 => "half",
+    4 => "whole",
+    # "breve"
+    # "long"
+    # "maxima"
+)
+
+
 ################################################################
 """
     Part
