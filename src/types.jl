@@ -559,7 +559,7 @@ tie:
     pitch::UN{Pitch} = nothing, "~"
     rest::UN{Rest} = nothing, "~"
     unpitched::UN{Unpitched} = nothing, "~"
-    duration::UN{UInt} = grace === nothing ? nothing : 1, "~"
+    duration::UN{Int} = grace === nothing ? nothing : 1, "~"
     chord::UN{Chord} = nothing, "~"
     # voice
     type::UN{String} = nothing, "~"
