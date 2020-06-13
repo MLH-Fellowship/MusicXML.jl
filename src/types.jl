@@ -585,9 +585,21 @@ notes: See [`Note`](@ref) doc
 @aml mutable struct Measure "measure"
     attributes::UN{Attributes} = nothing, "~"
     notes::Vector{Note}, "note"
-    @creator begin
-        notes = note_graphics(notes, attributes)
+end
+
+################################################################
+"""
+Finds and fixes the graphical representation of the notes for the given measures.
+"""
+function note_graphics(measures::Vector{Measure})
+    last_attributes = Attributes()
+    for i = 1:length(measures)
+        if !isnothing(measures[i].attributes)
+            last_attributes = measures[i].attributes
+        end
+        measures[i].notes = note_graphics(measures[i].notes, last_attributes)
     end
+    return measures
 end
 
 """
@@ -607,7 +619,7 @@ Note(pitch = Pitch(step = "B", alter = 0, octave = 5), duration =  4),
 MusicXML.note_graphics(notes, Attributes())
 ```
 """
-function note_graphics(notes, attributes)
+function note_graphics(notes::Vector{Note}, attributes::Attributes)
     for inote=1:length(notes)
         actual_duration = notes[inote].duration//attributes.divisions
         type = note_graphics_map[actual_duration]
@@ -632,8 +644,6 @@ const note_graphics_map = Dict(
     # "long"
     # "maxima"
 )
-
-
 ################################################################
 """
     Part
@@ -651,8 +661,12 @@ measures: See [`Measure`](@ref) doc
 """
 @aml mutable struct Part "part"
     id::String = "P1", att"~"
+    @creator begin
+        measures = note_graphics(measures)
+    end
     measures::Vector{Measure}, "measure"
 end
+
 ################################################################
 """
     ScorePartwise
