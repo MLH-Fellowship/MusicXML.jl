@@ -1,5 +1,6 @@
 using MusicXML
-@importMX # imports all the MusicXML types since we know there is no conflict
+
+@MX begin
 
 ## Part List
 ### Piano
@@ -103,3 +104,5 @@ parts =  [part_piano, part_guitar],
 )
 
 writemusicxml("myscore.musicxml", score)
+
+end
